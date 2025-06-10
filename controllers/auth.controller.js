@@ -1,3 +1,4 @@
+import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
 import generateToken from '../utils/generateToken.js';
 import createError from 'http-errors';
@@ -21,8 +22,26 @@ export const login = async (req, res, next) => {
     if (!user || !(await user.comparePassword(password))) {
       throw createError(401, 'Invalid email or password');
     }
+     const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    // Set token in cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: false, 
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
+
+    res.status(200).json({
+      message: 'Login successful',
+      user: { id: user._id, email: user.email },
+    });
+
     
-    res.json({ user, token: generateToken(user) });
   } catch (err) {
     next(err);
   }

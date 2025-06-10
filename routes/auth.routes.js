@@ -3,6 +3,7 @@ import { register, login } from '../controllers/auth.controller.js';
 import { body } from 'express-validator';
 import validate from '../middleware/validate.middleware.js';
 
+
 const router = express.Router();
 router.post('/register', [
     body('username').notEmpty().withMessage('Username is required'),
@@ -16,5 +17,5 @@ router.post('/login',[
     body('password').notEmpty().withMessage('Password is required')
   ],
   validate, login);
-
+  
 export default router;
