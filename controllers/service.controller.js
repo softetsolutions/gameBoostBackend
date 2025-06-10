@@ -3,8 +3,8 @@ import Service from '../models/service.model.js';
 // Create a new service
 export const createService = async (req, res, next) => {
   try {
-    const { name, type, icon } = req.body;
-    const newService =await Service.create({ name, type, icon });
+    const { name, type, icon, serviceType } = req.body;
+    const newService =await Service.create({ name, type, icon, serviceType });
     newService.save();
     res.status(201).json(newService);
   } catch (error) {

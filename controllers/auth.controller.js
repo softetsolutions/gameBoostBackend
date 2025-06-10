@@ -6,9 +6,15 @@ export const register = async (req, res, next) => {
   try {
     const { username, email, password, role } = req.body;
     const userExists = await User.findOne({ email });
-    if (userExists) throw createError(409, 'User already exists');
+    if (userExists) res.status(200).json({message:'User already exists'});
     const user = await User.create({ username, email, password, role });
-    res.status(201).json({ user, token: generateToken(user._id) });
+    const token = generateToken(user._id);
+
+    res.cookie('token', token, {
+      httpOnly: true,
+    });
+
+    res.status(201).json({ message: 'User registered successfully' , user});
   } catch (err) {
     next(err);
   }
@@ -22,8 +28,13 @@ export const login = async (req, res, next) => {
       throw createError(401, 'Invalid email or password');
     }
     
-    res.json({ user, token: generateToken(user) });
+   const token= generateToken(user._id) 
+   res.cookie('token', token ,{
+    httpOnly:true,
+   })
+   res.json({message:'login successful'})
   } catch (err) {
     next(err);
   }
 };
+
