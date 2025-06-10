@@ -3,6 +3,18 @@ import createError from 'http-errors';
 
 export const createProduct = async (req, res, next) => {
   try {
+    const { title } = req.body;
+
+    // Check if product with same title exists for the same seller
+    const existingProduct = await Product.findOne({
+      title,
+      sellerId: req.user._id,
+    });
+
+    if (existingProduct) {
+      return res.status(400).json({ message: 'Product with this title already exists' });
+    }
+    // Create new product
     const product = await Product.create({ ...req.body, sellerId: req.user._id });
     res.status(201).json(product);
   } catch (err) {
