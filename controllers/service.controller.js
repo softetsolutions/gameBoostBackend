@@ -8,7 +8,7 @@ export const createService = async (req, res, next) => {
     const service = new Service({ name, type, icon });
     await service.save();
 
-    res.status(200).json(service);
+    res.status(200).json({ success: true, data: service });
   } catch (err) {
     next(err);
   }

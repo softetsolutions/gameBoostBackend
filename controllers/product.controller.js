@@ -16,7 +16,7 @@ export const createProduct = async (req, res, next) => {
     }
     // Create new product
     const product = await Product.create({ ...req.body, sellerId: req.user._id });
-    res.status(201).json(product);
+    res.status(200).json({success:true, data: product});
   } catch (err) {
     next(err);
   }
@@ -25,7 +25,7 @@ export const createProduct = async (req, res, next) => {
 export const getAllProducts = async (req, res, next) => {
   try {
     const products = await Product.find().populate('sellerId', 'username');
-    res.json(products);
+    res.json({success:true, data: products});
   } catch (err) {
     next(err);
   }

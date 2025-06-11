@@ -9,7 +9,7 @@ export const register = async (req, res, next) => {
     const userExists = await User.findOne({ email });
     if (userExists) throw createError(409, 'User already exists');
     const user = await User.create({ username, email, password, role });
-    res.status(201).json({ user, token: generateToken(user._id) });
+    res.status(200).json({ user, token: generateToken(user._id) });
   } catch (err) {
     next(err);
   }
