@@ -9,8 +9,8 @@ import {
 
 const validateProducts = [
     body('title').notEmpty().withMessage('Title is required'),
-    body('price').isNumeric().withMessage('Price must be a number'),
-    body('category').notEmpty().withMessage('Category is required'),
+    // body('price').isNumeric().withMessage('Price must be a number'),
+    // body('category').notEmpty().withMessage('Category is required'),
     body('dynamicFields').optional().isObject().withMessage('Dynamic fields must be an object')
   ];
 const router = express.Router();

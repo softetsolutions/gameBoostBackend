@@ -8,10 +8,13 @@ export const register = async (req, res, next) => {
     const userExists = await User.findOne({ email });
     if (userExists) res.status(200).json({message:'User already exists'});
     const user = await User.create({ username, email, password, role });
-    const token = generateToken(user._id);
+    const token = generateToken(user);
 
     res.cookie('token', token, {
       httpOnly: true,
+      expires:new Date(Date.now()+60*60*1000),
+      // secure: true 
+      sameSite:'strict'
     });
 
     res.status(201).json({ message: 'User registered successfully' , user});
@@ -28,9 +31,12 @@ export const login = async (req, res, next) => {
       throw createError(401, 'Invalid email or password');
     }
     
-   const token= generateToken(user._id) 
+   const token= generateToken(user) 
    res.cookie('token', token ,{
     httpOnly:true,
+    expires:new Date(Date.now()+60*60*1000),
+    // secure:true 
+    sameSite:'strict'
    })
    res.json({message:'login successful'})
   } catch (err) {

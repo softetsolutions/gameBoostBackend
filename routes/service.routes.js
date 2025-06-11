@@ -1,4 +1,5 @@
 import express from 'express';
+import auth from '../middleware/auth.middleware.js';
 import {
   createService,
   getAllServices,
@@ -9,8 +10,8 @@ import {
 
 const router = express.Router();
 
-router.post('/', createService);
-router.get('/', getAllServices);
+router.post('/',auth, createService);
+router.get('/',auth, getAllServices);
 router.get('/:id', getServiceById);
 router.put('/:id', updateService);
 router.delete('/:id', deleteService);
