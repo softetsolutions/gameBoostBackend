@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
 import generateToken from '../utils/generateToken.js';
 import createError from 'http-errors';
-
+import { allowedRoutes } from '../config/constant.js';
 export const register = async (req, res, next) => {
   try {
     const { username, email, password, role } = req.body;
@@ -23,7 +23,7 @@ export const login = async (req, res, next) => {
       throw createError(401, 'Invalid email or password');
     }
      const token = jwt.sign(
-      { id: user._id,role: user.role, email: user.email },
+      { id: user._id,role: user.role,  allowedRoutes: allowedRoutes[user.role], },
       process.env.JWT_SECRET,
       { expiresIn: '8h' } 
     );
@@ -38,7 +38,7 @@ export const login = async (req, res, next) => {
 
     res.status(200).json({
       message: 'Login successful',
-      user: { id: user._id, email: user.email },
+      token,
     });
 
     
