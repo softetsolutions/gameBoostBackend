@@ -1,0 +1,181 @@
+openapi: 3.0.0
+info:
+  title: G2G 
+  version: 1.0.0
+  description: API documentation for Product, Offer, Order, and Service modules.
+
+servers:
+  - url: http://localhost:5000/api
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+        type:
+          type: string
+        productRequiredFields:
+          type: array
+          items:
+            type: object
+        additionalFields:
+          type: array
+          items:
+            type: object
+        service:
+          type: string
+        description:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+
+    Offer:
+      type: object
+      properties:
+        _id:
+          type: string
+        product:
+          type: string
+        seller:
+          type: string
+        offerDetails:
+          type: array
+          items:
+            type: object
+        price:
+          type: number
+        currency:
+          type: string
+        quantityAvailable:
+          type: number
+        deliveryTime:
+          type: string
+        status:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+
+    Order:
+      type: object
+      properties:
+        _id:
+          type: string
+        buyerId:
+          type: string
+        sellerId:
+          type: string
+        productId:
+          type: string
+        amount:
+          type: number
+        status:
+          type: string
+
+    Service:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        icon:
+          type: string 
+
+paths:
+  /products:
+    post:
+      summary: Create a product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '200':
+          description: Created
+
+  /offers:
+    post:
+      summary: Create an offer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Offer'
+      responses:
+        '200':
+          description: Created
+
+  /offers/{id}:
+    put:
+      summary: Update an offer
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Offer'
+      responses:
+        '200':
+          description: Updated
+
+    delete:
+      summary: Delete an offer
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deleted
+
+  /orders:
+    post:
+      summary: Create an order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                offerId:
+                  type: string
+                quantity:
+                  type: number
+      responses:
+        '200':
+          description: Created
+
+  /services:
+    post:
+      summary: Create a service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Service'
+      responses:
+        '200':
+          description: Created

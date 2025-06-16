@@ -79,6 +79,22 @@ export const getProduct = async (req, res, next) => {
   }
 };
 
+export const getProductsByServiceId = async (req, res, next) => {
+  try {
+    const { serviceId } = req.params;
+
+    if (!serviceId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ success: false, message: "Invalid service ID" });
+    }
+
+    const products = await Product.find({ service: serviceId }).select('title _id');
+
+    res.status(200).json({ success: true, data: products });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const updateProduct = async (req, res, next) => {
   try {
     const product = await Product.findOneAndUpdate(

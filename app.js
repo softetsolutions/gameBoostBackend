@@ -9,10 +9,14 @@ import serviceRoutes from './routes/service.routes.js';
 import offerRoutes from './routes/offer.routes.js';
 import errorHandler from './middleware/errorHandler.middleware.js';
 import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
 
 dotenv.config();
 const app = express();
 
+const swaggerDocument = YAML.load('./swagger.yaml');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use(compression());
 app.use(express.json());
 app.use(cookieParser());

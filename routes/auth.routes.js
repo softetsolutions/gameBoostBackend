@@ -8,8 +8,7 @@ const router = express.Router();
 router.post('/register', [
     body('username').notEmpty().withMessage('Username is required'),
     body('email').isEmail().withMessage('Valid email required'),
-    body('password').isLength({ min: 6 }).withMessage('Min 6 chars password'),
-    body('role').isIn(['buyer', 'seller']).withMessage('Invalid role')
+    body('password').isLength({ min: 6 }).withMessage('Min 6 chars password')
   ],
   validate, register);
 router.post('/login',[
