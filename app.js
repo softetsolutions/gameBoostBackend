@@ -8,6 +8,7 @@ import orderRoutes from './routes/order.routes.js';
 import serviceRoutes from './routes/service.routes.js';
 import offerRoutes from './routes/offer.routes.js';
 import errorHandler from './middleware/errorHandler.middleware.js';
+import cors from 'cors';
 
 dotenv.config();
 const app = express();
@@ -15,6 +16,10 @@ const app = express();
 app.use(compression());
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true,
+}));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
