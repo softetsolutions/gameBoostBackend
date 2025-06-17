@@ -8,9 +8,11 @@ import orderRoutes from './routes/order.routes.js';
 import serviceRoutes from './routes/service.routes.js';
 import offerRoutes from './routes/offer.routes.js';
 import errorHandler from './middleware/errorHandler.middleware.js';
+import credentialRoutes from './routes/credential.routes.js';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
+
 
 dotenv.config();
 const app = express();
@@ -30,6 +32,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/services',serviceRoutes);
 app.use('/api/offers', offerRoutes);
+app.use('/api/credentials', credentialRoutes);
 app.use(errorHandler);
 
 export default app;

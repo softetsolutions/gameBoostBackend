@@ -79,6 +79,7 @@ export const getProduct = async (req, res, next) => {
   }
 };
 
+//get product title and id by service id
 export const getProductsByServiceId = async (req, res, next) => {
   try {
     const { serviceId } = req.params;
