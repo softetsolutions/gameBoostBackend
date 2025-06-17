@@ -56,6 +56,8 @@ components:
           type: number
         deliveryTime:
           type: string
+        instantDelivery:
+          type: boolean
         status:
           type: string
         images:
@@ -86,14 +88,14 @@ components:
           type: string
         name:
           type: string
-        type:
-          type: string
         icon:
           type: string 
 
 paths:
   /products:
     post:
+      tags:
+        - Product
       summary: Create a product
       requestBody:
         required: true
@@ -104,10 +106,116 @@ paths:
       responses:
         '200':
           description: Created
+    get:
+      tags:
+        - Product
+      summary: Get all products
+      responses:
+        200:
+          description: A list of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductResponse'
 
+  /api/products/{productId}:
+    get:
+      tags:
+        - Product
+      summary: Get a product by ID
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Product found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        404:
+          description: Product not found
+
+    put:
+      tags:
+        - Product
+      summary: Update a product by ID
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+      responses:
+        200:
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        404:
+          description: Product not found
+
+    delete:
+      tags:
+        - Product
+      summary: Delete a product by ID
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Product deleted
+        404:
+          description: Product not found
+
+  /api/products/service/{serviceId}:
+    get:
+      tags:
+        - Product
+      summary: Get products by service ID
+      parameters:
+        - in: path
+          name: serviceId
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Filtered products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    _id:
+                      type: string
+                    title:
+                      type: string
+        400:
+          description: Invalid service ID
+  
   /offers:
     post:
       summary: Create an offer
+      tags:
+        - Offer
       requestBody:
         required: true
         content:
@@ -115,12 +223,50 @@ paths:
             schema:
               $ref: '#/components/schemas/Offer'
       responses:
+        '201':
+          description: Offer created successfully
+        '400':
+          description: Validation error
+
+    get:
+      summary: Get all offers
+      tags:
+        - Offer
+      responses:
         '200':
-          description: Created
+          description: List of offers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Offer'
 
   /offers/{id}:
+    get:
+      summary: Get an offer by ID
+      tags:
+        - Offer
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Offer retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Offer'
+        '404':
+          description: Offer not found
+
     put:
       summary: Update an offer
+      tags:
+        - Offer
       parameters:
         - in: path
           name: id
@@ -135,10 +281,16 @@ paths:
               $ref: '#/components/schemas/Offer'
       responses:
         '200':
-          description: Updated
+          description: Offer updated successfully
+        '400':
+          description: Validation error
+        '404':
+          description: Offer not found
 
     delete:
       summary: Delete an offer
+      tags:
+        - Offer
       parameters:
         - in: path
           name: id
@@ -147,7 +299,10 @@ paths:
             type: string
       responses:
         '200':
-          description: Deleted
+          description: Offer deleted successfully
+        '404':
+          description: Offer not found
+
 
   /orders:
     post:
@@ -169,6 +324,8 @@ paths:
 
   /services:
     post:
+      tags:
+        - Service
       summary: Create a service
       requestBody:
         required: true
@@ -179,3 +336,80 @@ paths:
       responses:
         '200':
           description: Created
+  /api/services:  
+    get:
+      tags:
+        - Service
+      summary: Get all services
+      responses:
+        200:
+          description: List of services
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceResponse'
+
+  /api/services/{serviceId}:
+    get:
+      tags:
+        - Service
+      summary: Get a service by ID
+      parameters:
+        - in: path
+          name: serviceId
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Service found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResponse'
+        404:
+          description: Service not found
+
+    put:
+      tags:
+        - Service
+      summary: Update a service by ID
+      parameters:
+        - in: path
+          name: serviceId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceInput'
+      responses:
+        200:
+          description: Service updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResponse'
+        404:
+          description: Service not found
+
+    delete:
+      tags:
+        - Service
+      summary: Delete a service by ID
+      parameters:
+        - in: path
+          name: serviceId
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Service deleted
+        404:
+          description: Service not found

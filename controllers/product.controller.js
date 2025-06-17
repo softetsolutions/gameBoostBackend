@@ -24,7 +24,7 @@ export const createProduct = async (req, res, next) => {
 
     // If no service ID provided but serviceName is, and user is admin, create the service
     if (!serviceId && serviceName) {
-      if (req.user.role !== 'seller') {
+      if (req.user.role !== 'admin') {
         return res.status(403).json({ success: false, message: 'Only admin can create a new service' });
       }
 

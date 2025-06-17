@@ -3,9 +3,9 @@ import Service from '../models/service.model.js';
 // Create a new service (for admin)
 export const createService = async (req, res, next) => {
   try {
-    const { name, type, icon } = req.body;
+    const { name, icon } = req.body;
 
-    const service = new Service({ name, type, icon });
+    const service = new Service({ name,  icon });
     await service.save();
 
     res.status(200).json({ success: true, data: service });
@@ -46,7 +46,7 @@ export const updateService = async (req, res, next) => {
 
     const updated = await Service.findByIdAndUpdate(
       id,
-      { name: req.body.name, type: req.body.type, icon: req.body.icon },
+      { name: req.body.name,  icon: req.body.icon },
       { new: true }
     );
 

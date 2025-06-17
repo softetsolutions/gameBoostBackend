@@ -14,8 +14,8 @@ const validateProducts = [
 const router = express.Router();
 router.get('/', getAllProducts);
 router.get('/:id', getProduct);
-router.post('/', auth, checkRole('seller'), validateProducts, validate, createProduct);
-router.put('/:id', auth, checkRole('seller'), validateProducts, validate, updateProduct);
-router.delete('/:id', auth, checkRole('seller'), deleteProduct);
+router.post('/', auth, checkRole('admin'), validateProducts, validate, createProduct);
+router.put('/:id', auth, checkRole('admin'), validateProducts, validate, updateProduct);
+router.delete('/:id', auth, checkRole('admin'), deleteProduct);
 router.get('/service/:serviceId',auth, getProductsByServiceId);
 export default router;
