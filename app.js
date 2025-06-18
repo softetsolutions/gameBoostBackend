@@ -8,6 +8,7 @@ import orderRoutes from './routes/order.routes.js';
 import serviceRoute from './routes/service.routes.js';
 import accountRoute from './routes/account.routes.js'
 import socialConnect from './routes/socialConnect.route.js'
+import verifyRoute from './routes/verification.routes.js'
 
 dotenv.config();
 const app = express();
@@ -22,5 +23,6 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/services', serviceRoute);
 app.use('/api/account', accountRoute);
 app.use('/api/social', socialConnect);
+app.use('/api/verify', verifyRoute);
 
 export default app;

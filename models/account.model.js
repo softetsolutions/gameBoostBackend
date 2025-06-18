@@ -8,7 +8,6 @@ const accountSchema = new mongoose.Schema({
   },
   lastName: {
     type: String,
-    // required: true,
     maxlength: 50,
   },
   nationalIdentityNumber: {
@@ -29,7 +28,6 @@ const accountSchema = new mongoose.Schema({
 instantMessengers: [{
     type: {
       type: String,
-      // required: true,
       enum: { 
         values: ["Whatsapp", "Telegram", "Wechat", "Others"],
         message: 'Invalid messenger type'
@@ -37,7 +35,6 @@ instantMessengers: [{
     },
     value: {
       type: String,
-      // required: true,
     }
   }],
   billingAddress: {
@@ -46,7 +43,7 @@ instantMessengers: [{
       required: true,
     },
     addressLine2: {
-      type: String // Optional
+      type: String 
     },
     city: {
       type: String,
