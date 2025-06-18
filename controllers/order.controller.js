@@ -10,8 +10,8 @@ export const createOrder = async (req, res, next) => {
       throw createError(400, 'Offer ID is required');
     }
 
-    const offer = await Offer.findById(offerId).populate('product');
-
+    const offer = await Offer.findById(offerId).populate('product').populate('seller');
+    
     if (!offer) {
       throw createError(404, 'Offer not found');
     }
@@ -23,12 +23,13 @@ export const createOrder = async (req, res, next) => {
     if (quantity > offer.quantityAvailable) {
       throw createError(400, `Only ${offer.quantityAvailable} units available`);
     }
-
+    
+    
     const amount = offer.price * quantity;
     
 
     const order = await Order.create({
-      buyerId: req.user._id || req.user.id,
+      userId: req.user.id,
       sellerId: offer.seller._id,
       productId: offer.product._id,
       amount,
@@ -52,10 +53,36 @@ export const createOrder = async (req, res, next) => {
   }
 };
 
-export const getMyOrders = async (req, res, next) => {
+export const getAllOrders = async (req, res, next) => {
   try {
-    const orders = await Order.find({ buyerId: req.user.id }).populate('productId');
-    res.json(orders);
+    const { page, limit, status } = req.query;
+
+    const filter = {};
+    if (status) filter.status = status;
+
+    const currentPage = parseInt(page) || 1;
+    const pageSize = parseInt(limit) || 0;
+
+    const totalOrders = await Order.countDocuments(filter);
+
+    let query = Order.find(filter)
+      .populate('userId sellerId productId')
+      .sort({ createdAt: -1 });
+
+    if (pageSize > 0) {
+      const skip = (currentPage - 1) * pageSize;
+      query = query.skip(skip).limit(pageSize);
+    }
+
+    const orders = await query;
+
+    res.status(200).json({
+      success: true,
+      currentPage,
+      totalOrders,
+      totalPages: pageSize > 0 ? Math.ceil(totalOrders / pageSize) : 1,
+      data: orders,
+    });
   } catch (err) {
     next(err);
   }
