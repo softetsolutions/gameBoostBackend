@@ -29,7 +29,7 @@ export const createOrder = async (req, res, next) => {
     
 
     const order = await Order.create({
-      userId: req.user.id,
+      buyerId: req.user.id,
       sellerId: offer.seller._id,
       productId: offer.product._id,
       amount,
@@ -66,7 +66,7 @@ export const getAllOrders = async (req, res, next) => {
     const totalOrders = await Order.countDocuments(filter);
 
     let query = Order.find(filter)
-      .populate('userId sellerId productId')
+      .populate('sellerId productId')
       .sort({ createdAt: -1 });
 
     if (pageSize > 0) {
@@ -87,3 +87,153 @@ export const getAllOrders = async (req, res, next) => {
     next(err);
   }
 };
+
+export const getOrdersByBuyerId = async (req, res, next) => {
+  try {
+    const buyerId = req.user._id || req.user.id;
+    const { status } = req.query;
+
+    const query = { buyerId };
+    if (status) {
+      query.status = status;
+    }
+
+    const orders = await Order.find(query)
+      .populate('productId')
+      .populate('sellerId', 'username email');
+
+    res.status(200).json({
+      success: true,
+      data: orders,
+    });
+  } catch (err) {
+    next(createError(500, 'Failed to fetch orders'));
+  }
+};
+
+export const getOrderById = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.findById(orderId)
+      .populate('productId')
+      .populate('sellerId', 'username email')
+      .populate('buyerId', 'username email');
+
+    if (!order) {
+      return next(createError(404, 'Order not found'));
+    }
+
+    res.status(200).json({ success: true, data: order });
+  } catch (err) {
+    next(createError(500, 'Failed to fetch order'));
+  }
+};
+
+export const deleteOrder = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return next(createError(404, 'Order not found'));
+    }
+
+    // Only buyer can delete
+    if (req.user.id !== order.buyerId.toString()) {
+      return next(createError(403, 'Unauthorized to delete this order'));
+    }
+
+    await Order.findByIdAndDelete(orderId);
+    res.status(200).json({ success: true, message: 'Order deleted successfully' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getOrdersBySellerId = async (req, res, next) => {
+  try {
+    const sellerId = req.user._id || req.user.id;
+    const { status } = req.query;
+
+    const query = { sellerId };
+    if (status) {
+      query.status = status;
+    }
+
+    const orders = await Order.find(query)
+      .populate('productId')
+      .populate('buyerId', 'username email');
+
+    res.status(200).json({
+      success: true,
+      data: orders,
+    });
+  } catch (err) {
+    next(createError(500, 'Failed to fetch orders'));
+  }
+};
+
+export const updateOrder = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const updates = req.body;
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return next(createError(404, 'Order not found'));
+    }
+  
+    if (!order.buyerId || !req.user || !req.user.id) {
+      return next(createError(403, 'Unauthorized or missing user ID'));
+    }
+    //  only buyer can update order details
+    if (req.user.id !== order.buyerId.toString()) {
+      return next(createError(403, 'Unauthorized to update this order'));
+    }
+
+    Object.assign(order, updates);
+    await order.save();
+
+    res.status(200).json({ success: true, data: order });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getOrderCountByStatus = async (req, res, next) => {
+  try {
+    const { status } = req.query;
+    const query = {};
+
+    if (status) {
+      query.status = status;
+    }
+
+    const count = await Order.countDocuments(query);
+    res.status(200).json({ success: true, data: count  });
+  } catch (err) {
+    next(createError(500, 'Failed to fetch order count'));
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
