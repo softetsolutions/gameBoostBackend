@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login } from '../controllers/auth.controller.js';
+import { register, login,logout } from '../controllers/auth.controller.js';
 import { body } from 'express-validator';
 import validate from '../middleware/validate.middleware.js';
 
@@ -16,5 +16,7 @@ router.post('/login',[
     body('password').notEmpty().withMessage('Password is required')
   ],
   validate, login);
+
+router.post('/logout', logout);
   
 export default router;
