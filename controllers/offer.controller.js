@@ -135,3 +135,20 @@ export const deleteOffer = async (req, res, next) => {
     next(err);
   }
 };
+
+// get offers by seller
+export const getOffersBySellerId = async (req, res, next) => {
+  try {
+    const { sellerId } = req.params;
+
+    if (!sellerId) {
+      throw createError(400, 'Seller ID is required');
+    }
+
+    const offers = await Offer.find({ seller: sellerId }).populate('product');
+
+    res.status(200).json({ success: true, data: offers });
+  } catch (err) {
+    next(err);
+  }
+};
