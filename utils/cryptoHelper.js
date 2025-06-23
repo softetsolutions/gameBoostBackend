@@ -1,4 +1,4 @@
-import CryptoJS from "crypto-js";
+
 import dotenv from "dotenv";
 dotenv.config();
 const secretKey = process.env.CRYPTO_SECRET_KEY;

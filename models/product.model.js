@@ -3,9 +3,9 @@ import mongoose from 'mongoose';
 const productRequiredFieldSchema = new mongoose.Schema({
   fieldName: { type: String, required: true },
   fieldType: { type: String, required: true }, 
-  options: [String], 
+  options: [String],
   required: { type: Boolean, default: true },
-},{ _id: false, timestamps: false }); 
+},{ _id: false, timestamps: false });
 
 const productSchema = new mongoose.Schema({
   title: { type: String, required: true },

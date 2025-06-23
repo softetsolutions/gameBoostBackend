@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import createError from 'http-errors';
 
+
 const auth = async (req, res, next) => {
   try {
     const token = req.cookies.token;
