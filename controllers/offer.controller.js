@@ -145,7 +145,13 @@ export const getOffersBySellerId = async (req, res, next) => {
       throw createError(400, 'Seller ID is required');
     }
 
-    const offers = await Offer.find({ seller: sellerId }).populate('product');
+    const offers = await Offer.find({ seller: sellerId }).populate({
+        path: 'product',
+        populate: {
+        path: 'service',
+        select: 'name', 
+        },
+      });
 
     res.status(200).json({ success: true, data: offers });
   } catch (err) {
