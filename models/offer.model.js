@@ -16,6 +16,7 @@ const offerSchema = new mongoose.Schema({
   currency: { type: String, default: 'INR' },
   quantityAvailable: { type: Number, default: 1 },
   deliveryTime: { type: String, required: true },
+  instantDelivery: { type: Boolean, default: false },
   status: {
     type: String,
     enum: ['active', 'inactive', 'soldout'],

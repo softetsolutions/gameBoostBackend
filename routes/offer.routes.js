@@ -9,6 +9,8 @@ import {
   getOfferById,
   updateOffer,
   deleteOffer,
+  getOffersByService,
+ getOffersBySellerId,
 } from '../controllers/offer.controller.js';
 
 const validateOffers = [
@@ -29,6 +31,8 @@ const router = express.Router();
 router.post('/', auth, checkRole('seller'),validateOffers, validate, createOffer);
 router.get('/', getAllOffers);
 router.get('/:id',auth, getOfferById);
+router.get('/seller/:sellerId',auth, getOffersBySellerId);
+router.get('/service/:serviceId', auth, getOffersByService);
 router.put('/:id', auth, checkRole('seller'),validateOffers, validate, updateOffer);
 router.delete('/:id', auth, checkRole('seller'), deleteOffer);
 

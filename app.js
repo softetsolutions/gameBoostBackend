@@ -14,12 +14,16 @@ import http from "http";
 import { Server } from "socket.io";
 import conversationRouter from "./routes/conversation.route.js";
 import setupSocket from "./socket.js";
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
 
 dotenv.config();
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+const swaggerDocument = YAML.load('./swagger.yaml');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use(compression());
 app.use(express.json());
 app.use(cookieParser());

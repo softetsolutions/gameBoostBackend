@@ -6,10 +6,6 @@ const serviceSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  type: {
-    type: String,
-    required: true
-  },
   icon: String,
   createdAt: {
     type: Date,

@@ -1,0 +1,498 @@
+openapi: 3.0.0
+info:
+  title: G2G 
+  version: 1.0.0
+  description: API documentation for Product, Offer, Order, and Service modules.
+
+servers:
+  - url: http://localhost:5000/api
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+        type:
+          type: string
+        productRequiredFields:
+          type: array
+          items:
+            type: object
+        additionalFields:
+          type: array
+          items:
+            type: object
+        service:
+          type: string
+        description:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+
+    Offer:
+      type: object
+      properties:
+        _id:
+          type: string
+        product:
+          type: string
+        seller:
+          type: string
+        offerDetails:
+          type: array
+          items:
+            type: object
+        price:
+          type: number
+        currency:
+          type: string
+        quantityAvailable:
+          type: number
+        deliveryTime:
+          type: string
+        instantDelivery:
+          type: boolean
+        status:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+
+    Order:
+      type: object
+      properties:
+        _id:
+          type: string
+        buyerId:
+          type: string
+        sellerId:
+          type: string
+        productId:
+          type: string
+        amount:
+          type: number
+        quantity:
+          type: number
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    Service:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        icon:
+          type: string 
+      components:
+
+    ServiceInput:
+      type: object
+      properties:
+        name:
+          type: string
+        icon:
+          type: string
+
+    ServiceResponse:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        icon:
+          type: string
+
+paths:
+  /products:
+    post:
+      tags:
+        - Product
+      summary: Create a product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '200':
+          description: Created
+    get:
+      tags:
+        - Product
+      summary: Get all products
+      responses:
+        200:
+          description: A list of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+
+  /api/products/{productId}:
+    get:
+      tags:
+        - Product
+      summary: Get a product by ID
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Product found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        404:
+          description: Product not found
+
+    put:
+      tags:
+        - Product
+      summary: Update a product by ID
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        200:
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        404:
+          description: Product not found
+
+    delete:
+      tags:
+        - Product
+      summary: Delete a product by ID
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Product deleted
+        404:
+          description: Product not found
+
+  /api/products/service/{serviceId}:
+    get:
+      tags:
+        - Product
+      summary: Get products by service ID
+      parameters:
+        - in: path
+          name: serviceId
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Filtered products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    _id:
+                      type: string
+                    title:
+                      type: string
+        400:
+          description: Invalid service ID
+  
+  /offers:
+    post:
+      summary: Create an offer
+      tags:
+        - Offer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Offer'
+      responses:
+        '201':
+          description: Offer created successfully
+        '400':
+          description: Validation error
+  
+  /api/offers:
+    get:
+      summary: Get all offers
+      tags:
+        - Offer
+      responses:
+        '200':
+          description: List of offers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Offer'
+
+  /offers/{id}:
+    get:
+      summary: Get an offer by ID
+      tags:
+        - Offer
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Offer retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Offer'
+        '404':
+          description: Offer not found
+ 
+    put:
+      summary: Update an offer
+      tags:
+        - Offer
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Offer'
+      responses:
+        '200':
+          description: Offer updated successfully
+        '400':
+          description: Validation error
+        '404':
+          description: Offer not found
+  
+    delete:
+      summary: Delete an offer
+      tags:
+        - Offer
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Offer deleted successfully
+        '404':
+          description: Offer not found
+  
+  /api/offers/by-service/{serviceId}:
+    get:
+      summary: Get all offers by service ID
+      description: Returns all offers associated with a given service ID. Supports optional pagination.
+      tags:
+        - Offer
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          description: ID of the service
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          description: Page number for pagination (optional)
+          schema:
+            type: integer
+            minimum: 1
+        - name: limit
+          in: query
+          required: false
+          description: Number of items per page (optional)
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: A list of offers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Offer'
+        '400':
+          description: Invalid service ID or bad request
+        '500':
+          description: Server error
+
+  /orders:
+    post:
+      summary: Create an order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                offerId:
+                  type: string
+                quantity:
+                  type: number
+      responses:
+        '200':
+          description: Created
+  
+  /api/orders:
+    get:
+      summary: Get all orders
+      responses:
+        '200':
+          description: A list of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+  /services:
+    post:
+      tags:
+        - Service
+      summary: Create a service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Service'
+      responses:
+        '200':
+          description: Created
+  /api/services:  
+    get:
+      tags:
+        - Service
+      summary: Get all services
+      responses:
+        200:
+          description: List of services
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceResponse'
+
+  /api/services/{serviceId}:
+    get:
+      tags:
+        - Service
+      summary: Get a service by ID
+      parameters:
+        - in: path
+          name: serviceId
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Service found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResponse'
+        404:
+          description: Service not found
+
+    put:
+      tags:
+        - Service
+      summary: Update a service by ID
+      parameters:
+        - in: path
+          name: serviceId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceInput'
+      responses:
+        200:
+          description: Service updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResponse'
+        404:
+          description: Service not found
+
+    delete:
+      tags:
+        - Service
+      summary: Delete a service by ID
+      parameters:
+        - in: path
+          name: serviceId
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Service deleted
+        404:
+          description: Service not found
