@@ -32,7 +32,7 @@ const router = express.Router();
 router.post('/', auth, checkRole('seller'),validateOffers, validate, createOffer);
 router.get('/', getAllOffers);
 router.get('/filter',  getOffersByProductAndService);
-router.get('/:id',auth, getOfferById);
+router.get('/:id', getOfferById);
 router.get('/seller/:sellerId',auth, getOffersBySellerId);
 router.get('/service/:serviceId', auth, getOffersByService);
 router.put('/:id', auth, checkRole('seller'),validateOffers, validate, updateOffer);

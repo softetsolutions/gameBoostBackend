@@ -124,7 +124,7 @@ export const deleteProduct = async (req, res, next) => {
 // get homepage data
 export const getHomePageData = async (req, res, next) => {
   try {
-    const services = await Service.find();
+    const services = await Service.find({ showOnHome: true });
 
     const serviceData = await Promise.all(
       services.map(async (service) => {
