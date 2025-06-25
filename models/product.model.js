@@ -4,7 +4,7 @@ const productRequiredFieldSchema = new mongoose.Schema({
   fieldName: { type: String, required: true },
   fieldType: { type: String, required: true }, 
   options: [String], 
-  required: { type: Boolean, default: true },
+  isrequired: { type: Boolean, default: true },
 },{ _id: false, timestamps: false }); 
 
 const productSchema = new mongoose.Schema({

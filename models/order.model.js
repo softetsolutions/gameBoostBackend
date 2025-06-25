@@ -5,7 +5,8 @@ const orderSchema = new mongoose.Schema({
   sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
   amount: { type: Number, required: true },
-  status: { type: String, enum: ['pending', 'paid', 'completed', 'cancelled'], default: 'pending' },
+  quantity: { type: Number, default: 1 },
+  status: { type: String, enum: ['pending', 'active', 'completed', 'cancelled'], default: 'pending' },
 }, { timestamps: true });
 
 export default mongoose.model('Order', orderSchema);
