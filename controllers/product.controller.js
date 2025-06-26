@@ -63,7 +63,7 @@ export const createProduct = async (req, res, next) => {
 
 export const getAllProducts = async (req, res, next) => {
   try {
-    const products = await Product.find().populate('service', 'username');
+    const products = await Product.find().populate('service', 'name');
     res.json({success:true, data: products});
   } catch (err) {
     next(err);
