@@ -1,5 +1,6 @@
 import Offer from '../models/offer.model.js';
 import Product from '../models/product.model.js';
+import Order from '../models/order.model.js';
 import createError from 'http-errors';
 
 // Create Offer
@@ -46,12 +47,36 @@ export const getAllOffers = async (req, res, next) => {
 };
 
 
-// Get Offer by ID
+// Get Offer by Id
 export const getOfferById = async (req, res, next) => {
   try {
-    const offer = await Offer.findById(req.params.id).populate('product seller');
+    const offer = await Offer.findById(req.params.id)
+      .populate({
+        path: 'product'
+      })
+      .populate({
+        path: 'seller',
+        select: '_id displayName'
+      });
+
     if (!offer) return next(createError(404, 'Offer not found'));
-    res.json({success: true, data: offer});
+
+    // Count completed orders for this seller
+    const completedOrderCount = await Order.countDocuments({
+      sellerId: offer.seller._id,
+      status: 'completed'
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        ...offer.toObject(),
+        seller: {
+          ...offer.seller.toObject(),
+          completedOrderCount
+        }
+      }
+    });
   } catch (err) {
     next(err);
   }

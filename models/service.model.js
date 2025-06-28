@@ -7,6 +7,9 @@ const serviceSchema = new mongoose.Schema({
     trim: true
   },
   icon: String,
+
+  showOnHome: { type: Boolean, default: false },
+ 
   createdAt: {
     type: Date,
     default: Date.now

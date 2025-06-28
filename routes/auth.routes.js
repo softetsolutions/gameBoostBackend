@@ -6,7 +6,8 @@ import validate from '../middleware/validate.middleware.js';
 
 const router = express.Router();
 router.post('/register', [
-    body('username').notEmpty().withMessage('Username is required'),
+    body('firstName').notEmpty().withMessage('firstName is required'),
+    body('lastName').notEmpty().withMessage('Last name is required'),
     body('email').isEmail().withMessage('Valid email required'),
     body('password').isLength({ min: 6 }).withMessage('Min 6 chars password')
   ],
