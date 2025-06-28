@@ -63,7 +63,7 @@ export const createProduct = async (req, res, next) => {
 
 export const getAllProducts = async (req, res, next) => {
   try {
-    const products = await Product.find().populate('service', 'username');
+    const products = await Product.find().populate('service', 'name');
     res.json({success:true, data: products});
   } catch (err) {
     next(err);
@@ -72,7 +72,7 @@ export const getAllProducts = async (req, res, next) => {
 
 export const getProduct = async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).populate('service', 'name');
     if (!product) throw createError(404, 'Product not found');
     res.json(product);
   } catch (err) {
@@ -124,7 +124,7 @@ export const deleteProduct = async (req, res, next) => {
 // get homepage data
 export const getHomePageData = async (req, res, next) => {
   try {
-    const services = await Service.find();
+    const services = await Service.find({ showOnHome: true });
 
     const serviceData = await Promise.all(
       services.map(async (service) => {
