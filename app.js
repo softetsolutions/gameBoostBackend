@@ -7,14 +7,11 @@ import productRoutes from "./routes/product.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import serviceRoutes from "./routes/service.routes.js";
 import offerRoutes from "./routes/offer.routes.js";
-import privacyRoutes from "./routes/privacy.routes.js";
 import accountRoutes from "./routes/account.routes.js";
 import socialRoutes from "./routes/social.routes.js";
 import errorHandler from "./middleware/errorHandler.middleware.js";
 import credentialRoutes from "./routes/credential.routes.js";
 import privacyRoutes from './routes/privacy.routes.js'
-import accountRoutes from './routes/account.routes.js';
-import socialRoutes from './routes/social.routes.js';
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
