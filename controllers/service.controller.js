@@ -78,7 +78,26 @@ export const deleteService = async (req, res, next) => {
   }
 };
 
+// admin can show or hide service on home page
+export const toggleHomeVisibility = async (req, res, next) => {
+  try {
+    const { serviceId, show } = req.body;
 
+    const updated = await Service.findByIdAndUpdate(
+      serviceId,
+      { showOnHome: !!show },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'Service not found' });
+    }
+
+    res.status(200).json({ success: true, message: 'Visibility updated', data: updated });
+  } catch (err) {
+    next(err);
+  }
+};
 
 
 

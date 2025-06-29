@@ -1,10 +1,70 @@
 import Order from '../models/order.model.js';
 import Offer from '../models/offer.model.js';
 import createError from 'http-errors';
+import client from '../config/paypal.js';
+import checkout from '@paypal/checkout-server-sdk';
 
-export const createOrder = async (req, res, next) => {
+export const createPayPalOrder = async (req, res, next) => {
   try {
-    const { offerId, quantity = 1 } = req.body;
+    const { amount } = req.body;
+
+    const request = new checkout.orders.OrdersCreateRequest();
+    request.requestBody({
+      intent: 'CAPTURE',
+      purchase_units: [
+        {
+          amount: {
+            currency_code: 'USD',
+            value: amount.toFixed(2),
+          },
+        },
+      ],
+    });
+
+    const response = await client.execute(request);
+    res.status(200).json({ success: true, orderID: response.result.id });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+const retryCaptureStatus = async (transactionId, maxAttempts = 3, delayMs = 2000) => {
+  let attempt = 0;
+
+  while (attempt < maxAttempts) {
+    attempt++;
+
+    const request = new checkout.payments.CapturesGetRequest(transactionId);
+    const response = await client.execute(request);
+    const status = response.result.status;
+
+    if (status === 'COMPLETED') {
+      return { completed: true, status, data: response.result };
+    }
+
+    if (attempt < maxAttempts) {
+      await delay(delayMs * attempt); 
+    }
+  }
+
+  return { completed: false, status: 'TIMEOUT' };
+};
+
+export const capturePayPalOrder = async (req, res, next) => {
+  try {
+    const { orderId,offerId, quantity = 1 } = req.body;
+   
+    const request = new checkout.orders.OrdersCaptureRequest(orderId);
+    request.requestBody({});
+
+    const capture = await client.execute(request);
+    const transaction = capture.result;
+
+    if (transaction.status !== 'COMPLETED') {
+      return res.status(400).json({ success: false, message: 'Payment not completed' });
+    }
 
     if (!offerId) {
       throw createError(400, 'Offer ID is required');
@@ -26,15 +86,23 @@ export const createOrder = async (req, res, next) => {
     
     
     const amount = offer.price * quantity;
-    
+    const transactionId = transaction.purchase_units[0].payments.captures[0].id;
+    const result = await retryCaptureStatus(transactionId);
 
+  if (!result.completed) {
+  return res.status(400).json({
+    success: false,
+    message: `Payment not completed after retries. Status: ${result.status}`
+  });
+  }
     const order = await Order.create({
       buyerId: req.user.id,
       sellerId: offer.seller._id,
       productId: offer.product._id,
       amount,
       quantity,
-     
+      status: 'paid',
+      paypalTransactionId: transactionId,
     });
 
     // Update offer quantity
