@@ -7,26 +7,26 @@ import productRoutes from "./routes/product.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import serviceRoutes from "./routes/service.routes.js";
 import offerRoutes from "./routes/offer.routes.js";
+import accountRoutes from "./routes/account.routes.js";
+import socialRoutes from "./routes/social.routes.js";
 import errorHandler from "./middleware/errorHandler.middleware.js";
 import credentialRoutes from "./routes/credential.routes.js";
 import privacyRoutes from './routes/privacy.routes.js'
-import accountRoutes from './routes/account.routes.js';
-import socialRoutes from './routes/social.routes.js';
 import cors from "cors";
+import swaggerUi from "swagger-ui-express";
+import YAML from "yamljs";
 import http from "http";
 import { Server } from "socket.io";
 import conversationRouter from "./routes/conversation.route.js";
 import setupSocket from "./socket.js";
-import swaggerUi from 'swagger-ui-express';
-import YAML from 'yamljs';
 
 dotenv.config();
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const swaggerDocument = YAML.load('./swagger.yaml');
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+const swaggerDocument = YAML.load("./swagger.yaml");
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use(compression());
 app.use(express.json());
 app.use(cookieParser());
@@ -42,11 +42,11 @@ app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/offers", offerRoutes);
-app.use("/api/credential", credentialRoutes);
+app.use("/api/credentials", credentialRoutes);
 app.use("/api/conversations", conversationRouter);
-app.use('/api/privacy',privacyRoutes);
-app.use('/api/account', accountRoutes);
-app.use('/api/social', socialRoutes);
+app.use("/api/privacy", privacyRoutes);
+app.use("/api/account", accountRoutes);
+app.use("/api/social", socialRoutes);
 app.use(errorHandler);
 
 setupSocket(io);
