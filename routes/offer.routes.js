@@ -2,6 +2,7 @@ import express from 'express';
 import auth from '../middleware/auth.middleware.js';
 import checkRole from '../middleware/role.middleware.js';
 import validate from '../middleware/validate.middleware.js';
+import upload from '../middleware/upload.js';
 import { body } from 'express-validator';
 import {
   createOffer,
@@ -29,7 +30,7 @@ const validateOffers = [
 
 const router = express.Router();
 
-router.post('/', auth, checkRole('seller'),validateOffers, validate, createOffer);
+router.post('/', auth, checkRole('seller'),validateOffers, validate,upload.array('images', 5), createOffer);
 router.get('/', getAllOffers);
 router.get('/filter',  getOffersByProductAndService);
 router.get('/:id', getOfferById);

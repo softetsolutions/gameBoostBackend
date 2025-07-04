@@ -2,6 +2,7 @@ import express from 'express';
 import auth from '../middleware/auth.middleware.js';
 import checkRole from '../middleware/role.middleware.js';
 import validate from '../middleware/validate.middleware.js';
+import upload from '../middleware/upload.js';
 import { body } from 'express-validator';
 import {
   createProduct, getAllProducts, getProduct, updateProduct, deleteProduct,getProductsByServiceId,getHomePageData
@@ -15,7 +16,7 @@ const router = express.Router();
 router.get('/', getAllProducts);
 router.get('/home', getHomePageData);
 router.get('/:id', getProduct);
-router.post('/', auth, checkRole('admin'), validateProducts, validate, createProduct);
+router.post('/', auth,upload.array('images', 5), checkRole('admin'), validateProducts, validate, createProduct);
 router.put('/:id', auth, checkRole('admin'), validateProducts, validate, updateProduct);
 router.delete('/:id', auth, checkRole('admin'), deleteProduct);
 router.get('/service/:serviceId',auth, getProductsByServiceId);

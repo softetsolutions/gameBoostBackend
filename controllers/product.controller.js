@@ -3,7 +3,12 @@ import createError from 'http-errors';
 import Service from '../models/service.model.js';
 import Offer from '../models/offer.model.js';
 
+/**
+ * @desc Create a product with Cloudinary image upload
+ */
 export const createProduct = async (req, res, next) => {
+  console.log('req.files:', req.files);
+  console.log('req.body:', req.body);
   try {
     const { title, service, serviceName, type, productRequiredFields, additionalFields, description, images } = req.body;
 
@@ -43,6 +48,10 @@ export const createProduct = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Service ID or serviceName is required' });
     }
 
+   const imageUrls = Array.isArray(req.files) ? req.files.map(file => file.path) : [];
+
+   console.log('Uploaded files:', req.files);
+
     // Create new product
     const product = await Product.create({
       title,
@@ -51,7 +60,7 @@ export const createProduct = async (req, res, next) => {
       additionalFields,
       service: serviceId,
       description,
-      images,
+      images:imageUrls,
       sellerId: req.user._id,
     });
 

@@ -4,19 +4,43 @@ import Order from '../models/order.model.js';
 import createError from 'http-errors';
 
 // Create Offer
+/**
+ * @desc Create an offer with Cloudinary image upload
+ */
 export const createOffer = async (req, res, next) => {
   try {
     const sellerId = req.user.id;
-    const { product } = req.body;
+     const {
+      product,
+      price,
+      quantityAvailable,
+      deliveryTime,
+      currency = 'INR',
+      offerDetails,
+      status,
+      instantDelivery = false,
+    } = req.body;
 
     // Check for existing offer by the same seller for the same product
     const existingOffer = await Offer.findOne({ seller: sellerId, product });
     if (existingOffer) {
       return res.status(400).json({ success:false, message: 'Offer already exists for this product by this seller' });
     }
+     
+    const imageUrls = Array.isArray(req.files) ? req.files.map(file => file.path) : [];
+
+
     // Create new offer
     const offer = await Offer.create({
-      ...req.body,
+      product,
+      price,
+      quantityAvailable,
+      deliveryTime,
+      currency,
+      offerDetails,
+      instantDelivery,
+      status,
+      images: imageUrls,
       seller: req.user.id, 
     });
 

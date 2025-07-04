@@ -3,7 +3,13 @@ import Service from '../models/service.model.js';
 // Create a new service (for admin)
 export const createService = async (req, res, next) => {
   try {
-    const { name, icon } = req.body;
+  const { name, icon } = req.body;
+  const existingService = await Service.findOne({
+   name,
+   });
+  if (existingService) {
+  return res.status(400).json({ success: false, message: 'Service with this Name already exists' });
+  }
 
     const service = new Service({ name,  icon });
     await service.save();
