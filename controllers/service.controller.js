@@ -1,5 +1,7 @@
-import Service from '../models/service.model.js';
-
+import Service from '../models/service.model.js'
+/**
+ * @desc Create a service with a single icon image (uploaded to Cloudinary)
+ */
 // Create a new service (for admin)
 export const createService = async (req, res, next) => {
   try {
@@ -10,8 +12,10 @@ export const createService = async (req, res, next) => {
   if (existingService) {
   return res.status(400).json({ success: false, message: 'Service with this Name already exists' });
   }
-
-    const service = new Service({ name,  icon });
+   
+    const iconUrl = req.file?.path;
+    
+    const service = new Service({ name,  icon:iconUrl });
     await service.save();
 
     res.status(200).json({ success: true, data: service });

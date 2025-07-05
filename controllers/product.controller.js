@@ -10,7 +10,7 @@ export const createProduct = async (req, res, next) => {
   console.log('req.files:', req.files);
   console.log('req.body:', req.body);
   try {
-    const { title, service, serviceName, type, productRequiredFields, additionalFields, description, images } = req.body;
+    let { title, service, serviceName, type, productRequiredFields, additionalFields, description, images } = req.body;
 
     if (!title) {
       return res.status(400).json({ success: false, message: 'Title is required' });
@@ -50,8 +50,14 @@ export const createProduct = async (req, res, next) => {
 
    const imageUrls = Array.isArray(req.files) ? req.files.map(file => file.path) : [];
 
-   console.log('Uploaded files:', req.files);
-
+ 
+  //parse productRequiredFields 
+  // if(typeof productRequiredFields === 'string'){
+    // productRequiredFields=JSON.parse(productRequiredFields);
+  // }
+  // else{
+    // return res.status(400).json({success:false,message:'invalid productRequiredFields format'});
+  // }
     // Create new product
     const product = await Product.create({
       title,
