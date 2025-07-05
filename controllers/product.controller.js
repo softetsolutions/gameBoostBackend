@@ -52,13 +52,13 @@ export const createProduct = async (req, res, next) => {
 
  
   //parse productRequiredFields 
-  // if(typeof productRequiredFields === 'string'){
-    // productRequiredFields=JSON.parse(productRequiredFields);
-  // }
-  // else{
-    // return res.status(400).json({success:false,message:'invalid productRequiredFields format'});
-  // }
-    // Create new product
+    if (typeof productRequiredFields === 'string') {
+      try {
+        productRequiredFields = JSON.parse(productRequiredFields);
+      } catch {
+        return res.status(400).json({ success: false, message: 'Invalid productRequiredFields format' });
+      }
+    }
     const product = await Product.create({
       title,
       type,
@@ -130,6 +130,14 @@ export const updateProduct = async (req, res, next) => {
     if (req.files && req.files.length > 0) {
       const imageUrls = req.files.map((file) => file.path);
       req.body.images = imageUrls; // overwrite existing or update
+    }
+    // Parse productRequiredFields if it's a string
+    if (req.body.productRequiredFields && typeof req.body.productRequiredFields === 'string') {
+      try {
+        req.body.productRequiredFields = JSON.parse(req.body.productRequiredFields);
+      } catch {
+        return res.status(400).json({ success: false, message: 'Invalid productRequiredFields format' });
+      }
     }
 
     // Update the product with new data
