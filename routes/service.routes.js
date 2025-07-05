@@ -14,7 +14,7 @@ router.post('/select', auth,checkRole('admin'), toggleHomeVisibility);
 router.get('/', auth, getAllServices);
 
 router.get('/:id', auth, getServiceById);
-router.put('/:id', auth,checkRole('admin'),  updateService);
+router.put('/:id', auth,upload.single('icon'),checkRole('admin'),  updateService);
 router.delete('/:id', auth,checkRole('admin'), deleteService);
 
 

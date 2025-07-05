@@ -111,16 +111,33 @@ export const getProductsByServiceId = async (req, res, next) => {
     next(err);
   }
 };
-
+/**
+ * @desc Update product and upload new images to Cloudinary if provided
+ */
 export const updateProduct = async (req, res, next) => {
-  try {
-    const product = await Product.findOneAndUpdate(
-      { _id: req.params.id, sellerId: req.user._id },
-      req.body,
-      { new: true }
-    );
-    if (!product) throw createError(404, 'Not authorized or not found');
-    res.json(product);
+   try {
+    // Find the product by ID and seller
+    const product = await Product.findOne({
+      _id: req.params.id,
+      sellerId: req.user._id,
+    });
+
+    if (!product) {
+      throw createError(404, 'Not authorized or product not found');
+    }
+
+    // Handle Cloudinary images (if new images uploaded)
+    if (req.files && req.files.length > 0) {
+      const imageUrls = req.files.map((file) => file.path);
+      req.body.images = imageUrls; // overwrite existing or update
+    }
+
+    // Update the product with new data
+    const updated = await Product.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+
+    res.status(200).json({ success: true, data: updated });
   } catch (err) {
     next(err);
   }

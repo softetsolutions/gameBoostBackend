@@ -17,7 +17,7 @@ router.get('/', getAllProducts);
 router.get('/home', getHomePageData);
 router.get('/:id', getProduct);
 router.post('/', auth,upload.array('images', 5), checkRole('admin'), validateProducts, validate, createProduct);
-router.put('/:id', auth, checkRole('admin'), validateProducts, validate, updateProduct);
+router.put('/:id', auth,upload.array('images'), checkRole('admin'), validateProducts, validate, updateProduct);
 router.delete('/:id', auth, checkRole('admin'), deleteProduct);
 router.get('/service/:serviceId',auth, getProductsByServiceId);
 

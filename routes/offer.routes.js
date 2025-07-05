@@ -30,13 +30,13 @@ const validateOffers = [
 
 const router = express.Router();
 
-router.post('/', auth, checkRole('seller'),validateOffers, validate,upload.array('images', 5), createOffer);
+router.post('/', auth, checkRole('seller'), validate,upload.array('images', 5), createOffer);
 router.get('/', getAllOffers);
 router.get('/filter',  getOffersByProductAndService);
 router.get('/:id', getOfferById);
 router.get('/seller/:sellerId',auth, getOffersBySellerId);
 router.get('/service/:serviceId', auth, getOffersByService);
-router.put('/:id', auth, checkRole('seller'),validateOffers, validate, updateOffer);
+router.put('/:id', auth,upload.array('images'), checkRole('seller'), validate, updateOffer);
 router.delete('/:id', auth, checkRole('seller'), deleteOffer);
 
 export default router;

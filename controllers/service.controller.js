@@ -54,18 +54,21 @@ export const updateService = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const updated = await Service.findByIdAndUpdate(
-      id,
-      { name: req.body.name,  icon: req.body.icon },
-      { new: true }
-    );
+     let updateData = { name: req.body.name };
+
+    // Handle new icon upload via Cloudinary (if file uploaded)
+    if (req.file) {
+      updateData.icon = req.file.path;
+    }
+
+    const updated = await Service.findByIdAndUpdate(id, updateData, { new: true });
 
     if (!updated) {
       
       return res.status(404).json({ message: 'Service not found' });
     }
 
-    res.json(updated);
+  res.status(200).json({ success: true, data: updated });
   } catch (err) {
     next(err);
   }

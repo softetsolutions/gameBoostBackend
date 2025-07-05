@@ -157,15 +157,30 @@ export const getOffersByService = async (req, res, next) => {
 
 
 // Update Offer
+/**
+ * @desc Update offer and upload new images to Cloudinary if provided
+ */
 export const updateOffer = async (req, res, next) => {
   try {
-    const offer = await Offer.findOneAndUpdate(
-      { _id: req.params.id, seller: req.user.id },
-      req.body,
-      { new: true }
-    );
-    if (!offer) return next(createError(404, 'Offer not found or unauthorized'));
-    res.json({ success: true, data: offer });
+    // Find the offer
+    const offer = await Offer.findOne({ _id: req.params.id, seller: req.user.id });
+
+    if (!offer) {
+      return next(createError(404, 'Offer not found or unauthorized'));
+    }
+
+    // Handle image uploads via Cloudinary
+    if (req.files && req.files.length > 0) {
+      const imageUrls = req.files.map(file => file.path);
+      req.body.images = imageUrls;
+    }
+
+    // Update the offer
+    const updated = await Offer.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+
+    res.status(200).json({ success: true, data: updated });
   } catch (err) {
     next(err);
   }
