@@ -4,7 +4,8 @@ import checkRole from '../middleware/role.middleware.js';
 import validate from '../middleware/validate.middleware.js';
 import { body } from 'express-validator';
 import {
-  createProduct, getAllProducts, getProduct, updateProduct, deleteProduct,getProductsByServiceId,getHomePageData
+  createProduct, getAllProducts, getProduct, updateProduct, deleteProduct,getProductsByServiceId,getHomePageData,
+  getProductAndServiceDetailBySearchString
 } from '../controllers/product.controller.js';
 
 const validateProducts = [
@@ -19,5 +20,6 @@ router.post('/', auth, checkRole('admin'), validateProducts, validate, createPro
 router.put('/:id', auth, checkRole('admin'), validateProducts, validate, updateProduct);
 router.delete('/:id', auth, checkRole('admin'), deleteProduct);
 router.get('/service/:serviceId',auth, getProductsByServiceId);
+router.get('/search/:searchString',getProductAndServiceDetailBySearchString);
 
 export default router;
