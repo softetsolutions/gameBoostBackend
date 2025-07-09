@@ -1,6 +1,7 @@
 import Offer from '../models/offer.model.js';
 import Product from '../models/product.model.js';
 import Order from '../models/order.model.js';
+import Service from '../models/service.model.js';
 import createError from 'http-errors';
 
 // Create Offer
@@ -232,18 +233,62 @@ export const getOffersByProductAndService = async (req, res, next) => {
       return next(createError(400, 'Both productId and serviceId are required'));
     }
 
-    
+    // Validate product under the service
     const product = await Product.findOne({ _id: productId, service: serviceId });
-
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found under this service' });
     }
 
-   
+    // Get all offers for this product
     const offers = await Offer.find({ product: productId }).populate('product');
-
-    res.status(200).json({ success: true, data: offers });
-  } catch (err) {
+  
+    //service details
+     const servicesWithCounts = await Service.aggregate([
+      {
+        $lookup: {
+          from: 'products',
+          localField: '_id',
+          foreignField: 'service',
+          as: 'products',
+        },
+      },
+      {
+        $unwind: {
+          path: '$products',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'offers',
+          localField: 'products._id',
+          foreignField: 'product',
+          as: 'offers',
+        },
+      },
+      {
+        $group: {
+          _id: {
+            _id: '$_id',
+            name: '$name',
+            icon: '$icon',
+          },
+          offerCount: { $sum: { $size: '$offers' } },
+        },
+      },
+      {
+        $project: {
+          _id: '$_id._id',
+          name: '$_id.name',
+          icon: '$_id.icon',
+          offerCount: 1,
+        },
+      },
+    ]);
+ 
+    res.status(200).json({success: true, servicesWithCounts, offers,});
+ 
+} catch (err) {
     next(err);
   }
 };
