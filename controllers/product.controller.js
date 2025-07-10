@@ -7,8 +7,6 @@ import Offer from '../models/offer.model.js';
  * @desc Create a product with Cloudinary image upload
  */
 export const createProduct = async (req, res, next) => {
-  console.log('req.files:', req.files);
-  console.log('req.body:', req.body);
   try {
     let { title, service, serviceName, type, productRequiredFields, additionalFields, description, images } = req.body;
 
@@ -19,7 +17,7 @@ export const createProduct = async (req, res, next) => {
     // Check if a product with the same title already exists for this seller
     const existingProduct = await Product.findOne({
       title,
-      sellerId: req.user._id,
+      serviceId: service,
     });
 
     if (existingProduct) {

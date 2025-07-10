@@ -12,6 +12,7 @@ import credentialRoutes from "./routes/credential.routes.js";
 import privacyRoutes from './routes/privacy.routes.js'
 import accountRoutes from './routes/account.routes.js';
 import socialRoutes from './routes/social.routes.js';
+import sellerRoutes from './routes/seller.routes.js';
 import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
@@ -51,6 +52,7 @@ app.use("/api/conversations", conversationRouter);
 app.use('/api/privacy',privacyRoutes);
 app.use('/api/account', accountRoutes);
 app.use('/api/social', socialRoutes);
+app.use('/api/seller', sellerRoutes);
 app.use(errorHandler);
 
 setupSocket(io);

@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Offer from '../models/offer.model.js';
 import Product from '../models/product.model.js';
 import Order from '../models/order.model.js';
@@ -241,54 +242,64 @@ export const getOffersByProductAndService = async (req, res, next) => {
 
     // Get all offers for this product
     const offers = await Offer.find({ product: productId }).populate('product');
-  
-    //service details
-     const servicesWithCounts = await Service.aggregate([
+   
+    // 3. Find all services that contain the same productId
+    const servicesWithSameProduct = await Product.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(productId)
+        }
+      },
       {
         $lookup: {
           from: 'products',
-          localField: '_id',
-          foreignField: 'service',
-          as: 'products',
-        },
+          localField: 'title', 
+          foreignField: 'title',
+          as: 'sameTitleProducts'
+        }
       },
       {
-        $unwind: {
-          path: '$products',
-          preserveNullAndEmptyArrays: true,
-        },
+        $unwind: '$sameTitleProducts'
+      },
+      {
+        $replaceRoot: { newRoot: '$sameTitleProducts' }
+      },
+      {
+        $lookup: {
+          from: 'services',
+          localField: 'service',
+          foreignField: '_id',
+          as: 'serviceDetails'
+        }
+      },
+      {
+        $unwind: '$serviceDetails'
       },
       {
         $lookup: {
           from: 'offers',
-          localField: 'products._id',
+          localField: '_id',
           foreignField: 'product',
-          as: 'offers',
-        },
+          as: 'offers'
+        }
       },
       {
         $group: {
-          _id: {
-            _id: '$_id',
-            name: '$name',
-            icon: '$icon',
-          },
+          _id: '$serviceDetails._id',
+          name: { $first: '$serviceDetails.name' },
+          icon: { $first: '$serviceDetails.icon' },
           offerCount: { $sum: { $size: '$offers' } },
-        },
-      },
-      {
-        $project: {
-          _id: '$_id._id',
-          name: '$_id.name',
-          icon: '$_id.icon',
-          offerCount: 1,
-        },
-      },
+        }
+      }
     ]);
- 
-    res.status(200).json({success: true, servicesWithCounts, offers,});
- 
-} catch (err) {
+
+    res.status(200).json({
+      success: true,
+      offers,
+      services: servicesWithSameProduct
+    });
+
+  } catch (err) {
     next(err);
   }
 };
