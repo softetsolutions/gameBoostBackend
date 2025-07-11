@@ -205,3 +205,57 @@ export const getHomePageData = async (req, res, next) => {
     next(err);
   }
 };
+
+export const getProductAndServiceDetailBySearchString = async (req, res) => {
+  const { searchString } = req.params;
+
+  try {
+    const products = await Product.find({
+      title: { $regex: searchString, $options: 'i' }
+    })
+      .populate('service')
+      .lean(); // Return plain JS objects for performance
+
+    const groupedProducts = {};
+
+    products.forEach(product => {
+      const title = product.title;
+
+      const serviceObject = product.service
+        ? { id: product.service._id.toString(), servicename: product.service.name }
+        : null;
+
+      if (!groupedProducts[title]) {
+        groupedProducts[title] = {
+          productName: title,
+          services: [],
+          serviceIds: new Set(), // To avoid duplicate services
+        };
+      }
+
+      if (
+        serviceObject &&
+        !groupedProducts[title].serviceIds.has(serviceObject.id)
+      ) {
+        groupedProducts[title].services.push({
+          id: serviceObject.id,
+          servicename: serviceObject.servicename
+        });
+        groupedProducts[title].serviceIds.add(serviceObject.id);
+      }
+    });
+
+    //Clean up (remove serviceIds Set before sending)
+    const result = Object.values(groupedProducts).map(group => ({
+      productName: group.productName,
+      services: group.services
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -27,7 +27,7 @@ export const createService = async (req, res, next) => {
 // Get all services
 export const getAllServices = async (req, res, next) => {
   try {
-    const services = await Service.find();
+    const services = await Service.find().select("name _id");
     res.json(services);
   } catch (err) {
     next(err);
@@ -40,7 +40,7 @@ export const getServiceById = async (req, res, next) => {
 
     const service = await Service.findById(id);
     if (!service) {
-      return res.status(404).json({ message: 'Service not found' });
+      return res.status(404).json({ message: "Service not found" });
     }
 
     res.json(service);
@@ -64,8 +64,7 @@ export const updateService = async (req, res, next) => {
     const updated = await Service.findByIdAndUpdate(id, updateData, { new: true });
 
     if (!updated) {
-      
-      return res.status(404).json({ message: 'Service not found' });
+      return res.status(404).json({ message: "Service not found" });
     }
 
   res.status(200).json({ success: true, data: updated });
@@ -74,7 +73,6 @@ export const updateService = async (req, res, next) => {
   }
 };
 
-
 // Delete a service by ID
 export const deleteService = async (req, res, next) => {
   try {
@@ -82,10 +80,10 @@ export const deleteService = async (req, res, next) => {
 
     const deleted = await Service.findByIdAndDelete(id);
     if (!deleted) {
-      return res.status(404).json({ message: 'Service not found' });
+      return res.status(404).json({ message: "Service not found" });
     }
 
-    res.json({ message: 'Service deleted successfully' });
+    res.json({ message: "Service deleted successfully" });
   } catch (err) {
     next(err);
   }
@@ -103,15 +101,15 @@ export const toggleHomeVisibility = async (req, res, next) => {
     );
 
     if (!updated) {
-      return res.status(404).json({ success: false, message: 'Service not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Service not found" });
     }
 
-    res.status(200).json({ success: true, message: 'Visibility updated', data: updated });
+    res
+      .status(200)
+      .json({ success: true, message: "Visibility updated", data: updated });
   } catch (err) {
     next(err);
   }
 };
-
-
-
-

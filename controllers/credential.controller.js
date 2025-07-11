@@ -8,9 +8,12 @@ export const createCredential = async (req, res) => {
     if (!offerId || !label || !value) {
       return res
         .status(400)
-        .json({ error: "offerId, label and value are required." });
+        .json({
+          success: false,
+          error: "offerId, label and value are required.",
+        });
     }
-    
+
     const encryptedValue = encrypt(value);
 
     const credential = await Credential.create({
@@ -21,12 +24,14 @@ export const createCredential = async (req, res) => {
     });
 
     res
-      .status(201)
-      .json({ message: "Credential created successfully.", credential });
+      .status(200)
+      .json({
+        success: true,
+        message: "Credential created successfully.",
+        data: credential,
+      });
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Failed to create credential.", details: error.message });
+    next(error);
   }
 };
 
@@ -36,16 +41,16 @@ export const deleteCredential = async (req, res) => {
 
     const credential = await Credential.findById(id);
     if (!credential) {
-      return res.status(404).json({ error: "Credential not found." });
+      return res
+        .status(404)
+        .json({ success: false, error: "Credential not found." });
     }
 
     await Credential.findByIdAndDelete(id);
 
-    res.json({ message: "Credential deleted" });
+    res.status(200).json({ success: true, message: "Credential deleted" });
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Failed to delete credential.", details: error.message });
+    next(error);
   }
 };
 
@@ -56,10 +61,11 @@ export const getCredential = async (req, res) => {
       return res.status(404).json({ error: "Credential not found." });
     }
     const decryptedValue = decrypt(credential.value);
-    res.json({
-      decryptedData: decryptedValue,
+    res.status(200).json({
+      success: true,
+      data: decryptedValue,
     });
-  } catch (error) {
-    res.status(500).json({ error: "error", details: error.message });
+  } catch (err) {
+    next(err);
   }
 };

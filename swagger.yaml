@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: G2G 
+  title: G2G
   version: 1.0.0
   description: API documentation for Product, Offer, Order, and Service modules.
 
@@ -94,7 +94,7 @@ components:
         name:
           type: string
         icon:
-          type: string 
+          type: string
       components:
 
     ServiceInput:
@@ -114,6 +114,104 @@ components:
           type: string
         icon:
           type: string
+    Message:
+      type: object
+      properties:
+        user:
+          type: string
+          enum: [user1, user2]
+        text:
+          type: string
+        read:
+          type: boolean
+        timestamp:
+          type: string
+          format: date-time
+
+    Conversation:
+      type: object
+      properties:
+        _id:
+          type: string
+        participants:
+          type: object
+          properties:
+            user1:
+              type: string
+            user2:
+              type: string
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ConversationSummary:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: The other user's ID
+        displayName:
+          type: string
+          description: The other user's display name
+        unreadCount:
+          type: integer
+          description: Number of unread messages in the conversation
+        lastMessage:
+          type: string
+          description: The text content of the last message
+        timestamp:
+          type: string
+          format: date-time
+          description: When the last message was sent
+    
+    CredentialInput:
+      type: object
+      required:
+        - offerId
+        - label
+        - value
+      properties:
+        offerId:
+          type: string
+        orderId:
+          type: string
+        label:
+          type: string
+        value:
+          type: string
+          description: Plain text value that will be encrypted
+
+    CredentialResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            _id:
+              type: string
+            offerId:
+              type: string
+            orderId:
+              type: string
+            label:
+              type: string
+            value:
+              type: string
+              description: Encrypted value
+            isDelivered:
+              type: boolean
+            isDeletedFromSellerView:
+              type: boolean
 
 paths:
   /products:
@@ -126,9 +224,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Product'
+              $ref: "#/components/schemas/Product"
       responses:
-        '200':
+        "200":
           description: Created
     get:
       tags:
@@ -142,7 +240,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Product'
+                  $ref: "#/components/schemas/Product"
 
   /api/products/{productId}:
     get:
@@ -161,7 +259,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Product'
+                $ref: "#/components/schemas/Product"
         404:
           description: Product not found
 
@@ -180,14 +278,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Product'
+              $ref: "#/components/schemas/Product"
       responses:
         200:
           description: Product updated
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Product'
+                $ref: "#/components/schemas/Product"
         404:
           description: Product not found
 
@@ -334,27 +432,27 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Offer'
+              $ref: "#/components/schemas/Offer"
       responses:
-        '201':
+        "201":
           description: Offer created successfully
-        '400':
+        "400":
           description: Validation error
-  
+
   /api/offers:
     get:
       summary: Get all offers
       tags:
         - Offer
       responses:
-        '200':
+        "200":
           description: List of offers
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Offer'
+                  $ref: "#/components/schemas/Offer"
 
      
 
@@ -370,15 +468,15 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Offer retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Offer'
-        '404':
+                $ref: "#/components/schemas/Offer"
+        "404":
           description: Offer not found
- 
+
     put:
       summary: Update an offer
       tags:
@@ -394,15 +492,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Offer'
+              $ref: "#/components/schemas/Offer"
       responses:
-        '200':
+        "200":
           description: Offer updated successfully
-        '400':
+        "400":
           description: Validation error
-        '404':
+        "404":
           description: Offer not found
-  
+
     delete:
       summary: Delete an offer
       tags:
@@ -414,9 +512,9 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Offer deleted successfully
-        '404':
+        "404":
           description: Offer not found
   /api/offers/filter:
     get:
@@ -535,7 +633,7 @@ paths:
             type: integer
             minimum: 1
       responses:
-        '200':
+        "200":
           description: A list of offers
           content:
             application/json:
@@ -548,10 +646,10 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Offer'
-        '400':
+                      $ref: "#/components/schemas/Offer"
+        "400":
           description: Invalid service ID or bad request
-        '500':
+        "500":
           description: Server error
 
   /orders:
@@ -569,21 +667,21 @@ paths:
                 quantity:
                   type: number
       responses:
-        '200':
+        "200":
           description: Created
-  
+
   /api/orders:
     get:
       summary: Get all orders
       responses:
-        '200':
+        "200":
           description: A list of orders
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Order'
+                  $ref: "#/components/schemas/Order"
   /services:
     post:
       tags:
@@ -594,11 +692,11 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Service'
+              $ref: "#/components/schemas/Service"
       responses:
-        '200':
+        "200":
           description: Created
-  /api/services:  
+  /api/services:
     get:
       tags:
         - Service
@@ -611,7 +709,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ServiceResponse'
+                  $ref: "#/components/schemas/ServiceResponse"
 
   /api/services/{serviceId}:
     get:
@@ -630,7 +728,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServiceResponse'
+                $ref: "#/components/schemas/ServiceResponse"
         404:
           description: Service not found
 
@@ -649,14 +747,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ServiceInput'
+              $ref: "#/components/schemas/ServiceInput"
       responses:
         200:
           description: Service updated
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServiceResponse'
+                $ref: "#/components/schemas/ServiceResponse"
         404:
           description: Service not found
 
@@ -675,3 +773,138 @@ paths:
           description: Service deleted
         404:
           description: Service not found
+  /api/conversations/between/{userId1}/{userId2}:
+    get:
+      summary: Get conversation between two users
+      tags:
+        - Conversations
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId1
+          required: true
+          schema:
+            type: string
+          description: First user's ID
+        - in: path
+          name: userId2
+          required: true
+          schema:
+            type: string
+          description: Second user's ID
+      responses:
+        "200":
+          description: Conversation between two users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Conversation not found
+  /api/conversations/user/{userId}:
+    get:
+      summary: Get conversation summaries for a user
+      tags:
+        - Conversations
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          description: The ID of the logged-in user
+      responses:
+        "200":
+          description: List of conversation summaries with other users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ConversationSummary"
+        "401":
+          description: Unauthorized
+
+  /api/credentials/create-credential:
+    post:
+      summary: Create a new credential
+      tags:
+        - Credentials
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CredentialInput'
+      responses:
+        '200':
+          description: Credential created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialResponse'
+        '400':
+          description: Missing required fields
+        '401':
+          description: Unauthorized
+
+  /api/credentials/delete-credential/{id}:
+    delete:
+      summary: Delete a credential by ID
+      tags:
+        - Credentials
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Credential ID to delete
+      responses:
+        '200':
+          description: Credential deleted
+        '401':
+          description: Unauthorized
+        '404':
+          description: Credential not found
+
+  /api/credentials/get-credential/{id}:
+    get:
+      summary: Get (decrypted) credential value by ID
+      tags:
+        - Credentials
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Credential ID
+      responses:
+        '200':
+          description: Decrypted credential value
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: string
+                    description: Decrypted value
+        '401':
+          description: Unauthorized
+        '404':
+          description: Credential not found

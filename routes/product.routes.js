@@ -5,7 +5,8 @@ import validate from '../middleware/validate.middleware.js';
 import upload from '../middleware/upload.js';
 import { body } from 'express-validator';
 import {
-  createProduct, getAllProducts, getProduct, updateProduct, deleteProduct,getProductsByServiceId,getHomePageData
+  createProduct, getAllProducts, getProduct, updateProduct, deleteProduct,getProductsByServiceId,getHomePageData,
+  getProductAndServiceDetailBySearchString
 } from '../controllers/product.controller.js';
 
 const validateProducts = [
@@ -20,5 +21,6 @@ router.post('/', auth,upload.array('images', 5), checkRole('admin'), validatePro
 router.put('/:id', auth,upload.array('images'), checkRole('admin'), validateProducts, validate, updateProduct);
 router.delete('/:id', auth, checkRole('admin'), deleteProduct);
 router.get('/service/:serviceId',auth, getProductsByServiceId);
+router.get('/search/:searchString',getProductAndServiceDetailBySearchString);
 
 export default router;
