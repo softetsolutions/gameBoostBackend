@@ -356,6 +356,8 @@ paths:
                 items:
                   $ref: '#/components/schemas/Offer'
 
+     
+
   /offers/{id}:
     get:
       summary: Get an offer by ID
@@ -420,8 +422,8 @@ paths:
     get:
       tags:
         - Offer
-      summary: Get offers by productId and serviceId
-      description: Returns all offers for a specific product that belongs to a specific service.
+      summary: Get offers by product and service ID with related services
+      description: List of offers and related services with offer count
       parameters:
         - name: productId
           in: query
@@ -450,6 +452,20 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Offer'
+                services:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                      name:
+                        type: string
+                      icon:
+                        type: string
+                      offerCount:
+                        type: integer
+
         '400':
           description: Missing productId or serviceId
         '404':

@@ -6,7 +6,13 @@ const userSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName:  { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  password: {
+      type: String,
+      required: function () {
+        return this.socialAccounts ? false : true;
+      },
+    },
+
   role: { type: String, enum: ['user', 'seller'], default: 'user' },
   walletBalance: { type: Number, default: 0 },
   // Personal Information
