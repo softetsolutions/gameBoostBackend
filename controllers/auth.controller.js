@@ -3,12 +3,30 @@ import User from '../models/user.model.js';
 import generateToken from '../utils/generateToken.js';
 import createError from 'http-errors';
 import { allowedRoutes } from '../config/constant.js';
+import crypto from 'crypto';
+
+function generateUsername(firstName) {
+  const randomSuffix = crypto.randomBytes(2).toString('hex'); // 4 characters
+  return `${firstName.toLowerCase()}_${randomSuffix}`;
+}
+
 export const register = async (req, res, next) => {
   try {
     const { firstName,lastName, email, password } = req.body;
     const userExists = await User.findOne({ email });
     if (userExists) throw createError(409, 'User already exists');
-    const user = await User.create({ firstName,lastName, email, password });
+   // Auto-generate unique username
+    let username;
+    let isUnique = false;
+    while (!isUnique) {
+      const tempUsername = generateUsername(firstName);
+      const existing = await User.findOne({ username: tempUsername });
+      if (!existing) {
+        username = tempUsername;
+        isUnique = true;
+      }
+    }
+    const user = await User.create({username, firstName,lastName, email, password });
     res.status(200).json({ user, token: generateToken(user._id) });
   } catch (err) {
     next(err);

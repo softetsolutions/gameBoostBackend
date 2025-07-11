@@ -1,22 +1,48 @@
+import mongoose from 'mongoose';
 import Offer from '../models/offer.model.js';
 import Product from '../models/product.model.js';
 import Order from '../models/order.model.js';
+import Service from '../models/service.model.js';
 import createError from 'http-errors';
 
 // Create Offer
+/**
+ * @desc Create an offer with Cloudinary image upload
+ */
 export const createOffer = async (req, res, next) => {
   try {
     const sellerId = req.user.id;
-    const { product } = req.body;
+     const {
+      product,
+      price,
+      quantityAvailable,
+      deliveryTime,
+      currency = 'INR',
+      offerDetails,
+      status,
+      instantDelivery = false,
+    } = req.body;
 
     // Check for existing offer by the same seller for the same product
     const existingOffer = await Offer.findOne({ seller: sellerId, product });
     if (existingOffer) {
       return res.status(400).json({ success:false, message: 'Offer already exists for this product by this seller' });
     }
+     
+    const imageUrls = Array.isArray(req.files) ? req.files.map(file => file.path) : [];
+
+
     // Create new offer
     const offer = await Offer.create({
-      ...req.body,
+      product,
+      price,
+      quantityAvailable,
+      deliveryTime,
+      currency,
+      offerDetails,
+      instantDelivery,
+      status,
+      images: imageUrls,
       seller: req.user.id, 
     });
 
@@ -133,15 +159,30 @@ export const getOffersByService = async (req, res, next) => {
 
 
 // Update Offer
+/**
+ * @desc Update offer and upload new images to Cloudinary if provided
+ */
 export const updateOffer = async (req, res, next) => {
   try {
-    const offer = await Offer.findOneAndUpdate(
-      { _id: req.params.id, seller: req.user.id },
-      req.body,
-      { new: true }
-    );
-    if (!offer) return next(createError(404, 'Offer not found or unauthorized'));
-    res.json({ success: true, data: offer });
+    // Find the offer
+    const offer = await Offer.findOne({ _id: req.params.id, seller: req.user.id });
+
+    if (!offer) {
+      return next(createError(404, 'Offer not found or unauthorized'));
+    }
+
+    // Handle image uploads via Cloudinary
+    if (req.files && req.files.length > 0) {
+      const imageUrls = req.files.map(file => file.path);
+      req.body.images = imageUrls;
+    }
+
+    // Update the offer
+    const updated = await Offer.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+
+    res.status(200).json({ success: true, data: updated });
   } catch (err) {
     next(err);
   }
@@ -193,17 +234,80 @@ export const getOffersByProductAndService = async (req, res, next) => {
       return next(createError(400, 'Both productId and serviceId are required'));
     }
 
-    
+    // Validate product under the service
     const product = await Product.findOne({ _id: productId, service: serviceId });
-
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found under this service' });
     }
 
-   
+    // Get all offers for this product
     const offers = await Offer.find({ product: productId }).populate('product');
+   
+    // 3. Find all services that contain the same productId
+    const servicesWithSameProduct = await Product.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(productId)
+        }
+      },
+      {
+        $lookup: {
+          from: 'products',
+          localField: 'title', 
+          foreignField: 'title',
+          as: 'sameTitleProducts'
+        }
+      },
+      {
+        $unwind: '$sameTitleProducts'
+      },
+      {
+        $replaceRoot: { newRoot: '$sameTitleProducts' }
+      },
+      {
+        $lookup: {
+          from: 'services',
+          localField: 'service',
+          foreignField: '_id',
+          as: 'serviceDetails'
+        }
+      },
+      {
+        $unwind: '$serviceDetails'
+      },
+      {
+        $lookup: {
+          from: 'offers',
+          localField: '_id',
+          foreignField: 'product',
+          as: 'offers'
+        }
+      },
+       {
+        $addFields: {
+          offerCount: { $size: '$offers' }
+        }
+      },
+      {
+        $match: {
+          offerCount: { $gt: 0 }
+        }
+      },
+      {
+        $group: {
+          _id: '$serviceDetails._id',
+          name: { $first: '$serviceDetails.name' },
+          icon: { $first: '$serviceDetails.icon' },
+          offerCount: { $sum: '$offerCount' } }
+        },
+    ]);
 
-    res.status(200).json({ success: true, data: offers });
+    res.status(200).json({
+      success: true,
+      offers,
+      services: servicesWithSameProduct
+    });
+
   } catch (err) {
     next(err);
   }
