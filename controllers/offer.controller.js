@@ -283,14 +283,23 @@ export const getOffersByProductAndService = async (req, res, next) => {
           as: 'offers'
         }
       },
+       {
+        $addFields: {
+          offerCount: { $size: '$offers' }
+        }
+      },
+      {
+        $match: {
+          offerCount: { $gt: 0 }
+        }
+      },
       {
         $group: {
           _id: '$serviceDetails._id',
           name: { $first: '$serviceDetails.name' },
           icon: { $first: '$serviceDetails.icon' },
-          offerCount: { $sum: { $size: '$offers' } },
-        }
-      }
+          offerCount: { $sum: '$offerCount' } }
+        },
     ]);
 
     res.status(200).json({
