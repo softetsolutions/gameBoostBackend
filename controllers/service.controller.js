@@ -1,11 +1,21 @@
-import Service from '../models/service.model.js';
-
+import Service from '../models/service.model.js'
+/**
+ * @desc Create a service with a single icon image (uploaded to Cloudinary)
+ */
 // Create a new service (for admin)
 export const createService = async (req, res, next) => {
   try {
-    const { name, icon } = req.body;
-
-    const service = new Service({ name,  icon });
+  const { name, icon } = req.body;
+  const existingService = await Service.findOne({
+   name,
+   });
+  if (existingService) {
+  return res.status(400).json({ success: false, message: 'Service with this Name already exists' });
+  }
+   
+    const iconUrl = req.file?.path;
+    
+    const service = new Service({ name,  icon:iconUrl });
     await service.save();
 
     res.status(200).json({ success: true, data: service });
@@ -17,7 +27,7 @@ export const createService = async (req, res, next) => {
 // Get all services
 export const getAllServices = async (req, res, next) => {
   try {
-    const services = await Service.find();
+    const services = await Service.find().select("name _id");
     res.json(services);
   } catch (err) {
     next(err);
@@ -30,7 +40,7 @@ export const getServiceById = async (req, res, next) => {
 
     const service = await Service.findById(id);
     if (!service) {
-      return res.status(404).json({ message: 'Service not found' });
+      return res.status(404).json({ message: "Service not found" });
     }
 
     res.json(service);
@@ -44,23 +54,24 @@ export const updateService = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const updated = await Service.findByIdAndUpdate(
-      id,
-      { name: req.body.name,  icon: req.body.icon },
-      { new: true }
-    );
+     let updateData = { name: req.body.name };
 
-    if (!updated) {
-      
-      return res.status(404).json({ message: 'Service not found' });
+    // Handle new icon upload via Cloudinary (if file uploaded)
+    if (req.file) {
+      updateData.icon = req.file.path;
     }
 
-    res.json(updated);
+    const updated = await Service.findByIdAndUpdate(id, updateData, { new: true });
+
+    if (!updated) {
+      return res.status(404).json({ message: "Service not found" });
+    }
+
+  res.status(200).json({ success: true, data: updated });
   } catch (err) {
     next(err);
   }
 };
-
 
 // Delete a service by ID
 export const deleteService = async (req, res, next) => {
@@ -69,10 +80,10 @@ export const deleteService = async (req, res, next) => {
 
     const deleted = await Service.findByIdAndDelete(id);
     if (!deleted) {
-      return res.status(404).json({ message: 'Service not found' });
+      return res.status(404).json({ message: "Service not found" });
     }
 
-    res.json({ message: 'Service deleted successfully' });
+    res.json({ message: "Service deleted successfully" });
   } catch (err) {
     next(err);
   }
@@ -90,15 +101,15 @@ export const toggleHomeVisibility = async (req, res, next) => {
     );
 
     if (!updated) {
-      return res.status(404).json({ success: false, message: 'Service not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Service not found" });
     }
 
-    res.status(200).json({ success: true, message: 'Visibility updated', data: updated });
+    res
+      .status(200)
+      .json({ success: true, message: "Visibility updated", data: updated });
   } catch (err) {
     next(err);
   }
 };
-
-
-
-

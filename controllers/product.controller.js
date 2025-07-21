@@ -3,9 +3,12 @@ import createError from 'http-errors';
 import Service from '../models/service.model.js';
 import Offer from '../models/offer.model.js';
 
+/**
+ * @desc Create a product with Cloudinary image upload
+ */
 export const createProduct = async (req, res, next) => {
   try {
-    const { title, service, serviceName, type, productRequiredFields, additionalFields, description, images } = req.body;
+    let { title, service, serviceName, type, productRequiredFields, additionalFields, description, images } = req.body;
 
     if (!title) {
       return res.status(400).json({ success: false, message: 'Title is required' });
@@ -14,7 +17,7 @@ export const createProduct = async (req, res, next) => {
     // Check if a product with the same title already exists for this seller
     const existingProduct = await Product.findOne({
       title,
-      sellerId: req.user._id,
+      serviceId: service,
     });
 
     if (existingProduct) {
@@ -43,7 +46,17 @@ export const createProduct = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Service ID or serviceName is required' });
     }
 
-    // Create new product
+   const imageUrls = Array.isArray(req.files) ? req.files.map(file => file.path) : [];
+
+ 
+  //parse productRequiredFields 
+    if (typeof productRequiredFields === 'string') {
+      try {
+        productRequiredFields = JSON.parse(productRequiredFields);
+      } catch {
+        return res.status(400).json({ success: false, message: 'Invalid productRequiredFields format' });
+      }
+    }
     const product = await Product.create({
       title,
       type,
@@ -51,7 +64,7 @@ export const createProduct = async (req, res, next) => {
       additionalFields,
       service: serviceId,
       description,
-      images,
+      images:imageUrls,
       sellerId: req.user._id,
     });
 
@@ -96,16 +109,41 @@ export const getProductsByServiceId = async (req, res, next) => {
     next(err);
   }
 };
-
+/**
+ * @desc Update product and upload new images to Cloudinary if provided
+ */
 export const updateProduct = async (req, res, next) => {
-  try {
-    const product = await Product.findOneAndUpdate(
-      { _id: req.params.id, sellerId: req.user._id },
-      req.body,
-      { new: true }
-    );
-    if (!product) throw createError(404, 'Not authorized or not found');
-    res.json(product);
+   try {
+    // Find the product by ID and seller
+    const product = await Product.findOne({
+      _id: req.params.id,
+      sellerId: req.user._id,
+    });
+
+    if (!product) {
+      throw createError(404, 'Not authorized or product not found');
+    }
+
+    // Handle Cloudinary images (if new images uploaded)
+    if (req.files && req.files.length > 0) {
+      const imageUrls = req.files.map((file) => file.path);
+      req.body.images = imageUrls; // overwrite existing or update
+    }
+    // Parse productRequiredFields if it's a string
+    if (req.body.productRequiredFields && typeof req.body.productRequiredFields === 'string') {
+      try {
+        req.body.productRequiredFields = JSON.parse(req.body.productRequiredFields);
+      } catch {
+        return res.status(400).json({ success: false, message: 'Invalid productRequiredFields format' });
+      }
+    }
+
+    // Update the product with new data
+    const updated = await Product.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+
+    res.status(200).json({ success: true, data: updated });
   } catch (err) {
     next(err);
   }
@@ -165,5 +203,59 @@ export const getHomePageData = async (req, res, next) => {
     res.status(200).json({ success: true, data: serviceData });
   } catch (err) {
     next(err);
+  }
+};
+
+export const getProductAndServiceDetailBySearchString = async (req, res) => {
+  const { searchString } = req.params;
+
+  try {
+    const products = await Product.find({
+      title: { $regex: searchString, $options: 'i' }
+    })
+      .populate('service')
+      .lean(); // Return plain JS objects for performance
+
+    const groupedProducts = {};
+
+    products.forEach(product => {
+      const title = product.title;
+
+      const serviceObject = product.service
+        ? { id: product.service._id.toString(), servicename: product.service.name }
+        : null;
+
+      if (!groupedProducts[title]) {
+        groupedProducts[title] = {
+          productName: title,
+          services: [],
+          serviceIds: new Set(), // To avoid duplicate services
+        };
+      }
+
+      if (
+        serviceObject &&
+        !groupedProducts[title].serviceIds.has(serviceObject.id)
+      ) {
+        groupedProducts[title].services.push({
+          id: serviceObject.id,
+          servicename: serviceObject.servicename
+        });
+        groupedProducts[title].serviceIds.add(serviceObject.id);
+      }
+    });
+
+    //Clean up (remove serviceIds Set before sending)
+    const result = Object.values(groupedProducts).map(group => ({
+      productName: group.productName,
+      services: group.services
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    next(error);
   }
 };
