@@ -225,44 +225,34 @@ export const getOffersBySellerId = async (req, res, next) => {
   }
 };
 
-// get offers by pruduct and service id 
+// get offers by pruduct and service name 
 export const getOffersByProductAndService = async (req, res, next) => {
   try {
-    const { productId, serviceId } = req.query;
+    const { serviceName, productTitle } = req.query;
 
-    if (!productId || !serviceId) {
-      return next(createError(400, 'Both productId and serviceId are required'));
+    if (!serviceName || !productTitle) {
+      return next(createError(400, 'Both serviceName and productTitle are required'));
     }
 
-    // Validate product under the service
-    const product = await Product.findOne({ _id: productId, service: serviceId });
+    // 1. Find service by name
+    const service = await Service.findOne({ name: serviceName });
+    if (!service) {
+      return next(createError(404, 'Service not found'));
+    }
+
+    // 2. Find product by title and service ID
+    const product = await Product.findOne({ title: productTitle, service: service._id });
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found under this service' });
     }
 
-    // Get all offers for this product
-    const offers = await Offer.find({ product: productId }).populate('product');
-   
-    // 3. Find all services that contain the same productId
+    // 3. Get offers for that product
+    const offers = await Offer.find({ product: product._id }).populate('product');
+
+    // 4. Find all services that share the same product title and have offers
     const servicesWithSameProduct = await Product.aggregate([
       {
-        $match: {
-          _id: new mongoose.Types.ObjectId(productId)
-        }
-      },
-      {
-        $lookup: {
-          from: 'products',
-          localField: 'title', 
-          foreignField: 'title',
-          as: 'sameTitleProducts'
-        }
-      },
-      {
-        $unwind: '$sameTitleProducts'
-      },
-      {
-        $replaceRoot: { newRoot: '$sameTitleProducts' }
+        $match: { title: productTitle }
       },
       {
         $lookup: {
@@ -272,9 +262,7 @@ export const getOffersByProductAndService = async (req, res, next) => {
           as: 'serviceDetails'
         }
       },
-      {
-        $unwind: '$serviceDetails'
-      },
+      { $unwind: '$serviceDetails' },
       {
         $lookup: {
           from: 'offers',
@@ -283,7 +271,7 @@ export const getOffersByProductAndService = async (req, res, next) => {
           as: 'offers'
         }
       },
-       {
+      {
         $addFields: {
           offerCount: { $size: '$offers' }
         }
@@ -298,8 +286,9 @@ export const getOffersByProductAndService = async (req, res, next) => {
           _id: '$serviceDetails._id',
           name: { $first: '$serviceDetails.name' },
           icon: { $first: '$serviceDetails.icon' },
-          offerCount: { $sum: '$offerCount' } }
-        },
+          offerCount: { $sum: '$offerCount' }
+        }
+      }
     ]);
 
     res.status(200).json({
